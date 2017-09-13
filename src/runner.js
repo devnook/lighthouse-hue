@@ -18,7 +18,7 @@
 
 const lighthouse = require('lighthouse');
 const ChromeLauncher = require('lighthouse/chrome-launcher/chrome-launcher.js');
-const Log = require('lighthouse/lighthouse-core/lib/log');
+const Log = require('lighthouse/lighthouse-logger');
 
 const _SIGINT = 'SIGINT';
 const _SIGINT_EXIT_CODE = 130;

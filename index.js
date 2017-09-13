@@ -19,9 +19,8 @@
 const fs = require('fs');
 const opn = require('opn');
 const yargs = require('yargs');
-const ReportGenerator = require('lighthouse/lighthouse-core/report/report-generator');
 const ReportGeneratorV2 = require('lighthouse/lighthouse-core/report/v2/report-generator');
-const Log = require('lighthouse/lighthouse-core/lib/log');
+const Log = require('lighthouse/lighthouse-logger');
 const LighthouseRunner = require('./src/runner');
 const {HueLights, COLORS} = require('./src/huelights');
 
@@ -29,8 +28,8 @@ const {HueLights, COLORS} = require('./src/huelights');
 // const DEFAULT_CONFIG = require('lighthouse/lighthouse-core/config/default.json');
 
 const APP_DESCRIPTION = 'Lighthouse';
-const USERNAME = fs.readFileSync('.hueusername', 'utf8');
-const BRIDGE_IP = fs.readFileSync('.bridgeipaddress', 'utf8') || null;
+const USERNAME = fs.readFileSync('.hueusername', 'utf8').trim();
+const BRIDGE_IP = fs.readFileSync('.bridgeipaddress', 'utf8').trim() || null;
 
 const flags = yargs
   .help('h')
@@ -40,7 +39,6 @@ const flags = yargs
   .alias('v', 'version')
   .showHelpOnFail(false, 'Specify --help for available options')
   .boolean(['reset', 'view', 'headless'])
-  .default('output', 'domhtml')
   .default('output-path', './public/results.html')
   .default('log-level', 'info')
   .argv;
@@ -81,13 +79,7 @@ function runLighthouse() {
   return runner.run().then(results => {
     results.artifacts = undefined; // prevent circular references in the JSON.
 
-    let html;
-    if (flags.output === 'domhtml') {
-      html = new ReportGeneratorV2().generateReportHtml(results);
-    } else {
-      html = new ReportGenerator().generateHTML(results, 'cli');
-    }
-
+    let html = new ReportGeneratorV2().generateReportHtml(results);
     fs.writeFileSync(flags.outputPath, html);
 
     const score = runner.getOverallScore(results);
